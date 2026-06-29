@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Emoji Arena — a real-time multiplayer Match-3 game with cascades, chain reactions, and live scoring." />
+  <title>Emoji Arena 🎮</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ════════════════════════════════════════════════════════
+       SCREEN 1 — LOBBY
+  ════════════════════════════════════════════════════════ -->
+  <section id="screen-lobby" class="screen active" aria-label="Lobby screen">
+
+    <!-- Floating background orbs -->
+    <div class="orb orb-1" aria-hidden="true"></div>
+    <div class="orb orb-2" aria-hidden="true"></div>
+    <div class="orb orb-3" aria-hidden="true"></div>
+
+    <div class="lobby-card glass">
+      <div class="lobby-logo" aria-label="Emoji Arena logo">
+        <span class="logo-emoji" aria-hidden="true">🎮</span>
+        <h1 class="logo-title">Emoji<span class="accent">Arena</span></h1>
+        <p class="logo-tagline">Match. Cascade. Dominate.</p>
+      </div>
+
+      <div class="lobby-form">
+        <div class="input-group">
+          <label for="player-name" class="input-label">Your Name</label>
+          <input
+            id="player-name"
+            type="text"
+            class="text-input"
+            placeholder="Enter your name…"
+            maxlength="18"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="board-size-group">
+          <span class="input-label">Board Size</span>
+          <div class="size-options" role="radiogroup" aria-label="Board size">
+            <label class="size-pill" for="size-6">
+              <input type="radio" id="size-6" name="board-size" value="6" />
+              <span>6 × 6</span>
+            </label>
+            <label class="size-pill selected" for="size-8">
+              <input type="radio" id="size-8" name="board-size" value="8" checked />
+              <span>8 × 8</span>
+            </label>
+            <label class="size-pill" for="size-10">
+              <input type="radio" id="size-10" name="board-size" value="10" />
+              <span>10 × 10</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="input-group score-limit-group">
+          <label for="score-limit" class="input-label">
+            🏁 Score Limit
+            <span class="input-hint">(first to reach this wins)</span>
+          </label>
+          <div class="score-limit-row">
+            <input
+              id="score-limit"
+              type="number"
+              class="text-input score-limit-input"
+              placeholder="e.g. 500"
+              min="50"
+              max="99999"
+              step="50"
+            />
+            <button type="button" id="btn-clear-limit" class="btn btn-ghost btn-sm" aria-label="No score limit (play until timer)">
+              ∞ No Limit
+            </button>
+          </div>
+          <p class="limit-preview" id="limit-preview" aria-live="polite"></p>
+        </div>
+
+        <button id="btn-start-game" class="btn btn-primary" aria-label="Start game">
+          <span class="btn-icon" aria-hidden="true">⚡</span>
+          Play Now
+        </button>
+
+        <button id="btn-view-scores" class="btn btn-ghost" aria-label="View scoreboard">
+          <span class="btn-icon" aria-hidden="true">🏆</span>
+          Scoreboard
+        </button>
+      </div>
+
+      <!-- Mini preview of animated emojis -->
+      <div class="emoji-ticker" aria-hidden="true">
+        <div class="ticker-track">
+          <span>😎</span><span>😊</span><span>😁</span><span>🤩</span>
+          <span>🤗</span><span>😍</span><span>🥳</span><span>😜</span>
+          <span>😇</span><span>🤪</span><span>😎</span><span>😊</span>
+          <span>😁</span><span>🤩</span><span>🤗</span><span>😍</span>
+          <span>🥳</span><span>😜</span><span>😇</span><span>🤪</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════
+       SCREEN 2 — GAME
+  ════════════════════════════════════════════════════════ -->
+  <section id="screen-game" class="screen" aria-label="Game screen" hidden>
+
+    <!-- ── Top bar ────────────────────────────────────────── -->
+    <header class="game-header">
+      <button id="btn-back-lobby" class="btn btn-icon-only" aria-label="Back to lobby" title="Back to lobby">
+        ←
+      </button>
+      <div class="header-center">
+        <h2 class="game-title">Emoji<span class="accent">Arena</span></h2>
+        <div class="score-limit-badge" id="score-limit-badge" hidden aria-label="Score limit">
+          🏁 Goal: <strong id="badge-limit-val">—</strong>
+        </div>
+      </div>
+      <button id="btn-open-scores" class="btn btn-icon-only" aria-label="Open scoreboard" title="Scoreboard">
+        🏆
+      </button>
+    </header>
+
+    <!-- ── Main game layout ──────────────────────────────── -->
+    <main class="game-layout">
+
+      <!-- Player 1 panel -->
+      <aside id="panel-p1" class="player-panel glass" aria-label="Player 1 panel">
+        <div class="player-avatar" id="avatar-p1" aria-hidden="true">🧑</div>
+        <div class="player-name" id="name-p1">Player 1</div>
+        <div class="score-display" aria-label="Player 1 score">
+          <span class="score-label">Score</span>
+          <span class="score-value" id="score-p1">0</span>
+        </div>
+        <div class="turn-indicator" id="turn-p1" aria-live="polite">
+          <span class="turn-dot"></span>
+          <span class="turn-text">Your Turn</span>
+        </div>
+        <!-- Per-player timer bar -->
+        <div class="timer-wrap" aria-label="Turn timer">
+          <div class="timer-bar" id="timer-bar-p1">
+            <div class="timer-fill" id="timer-fill-p1"></div>
+          </div>
+          <span class="timer-seconds" id="timer-secs-p1">15</span>
+        </div>
+        <!-- Match history -->
+        <ul class="match-history" id="history-p1" aria-label="Match history"></ul>
+      </aside>
+
+      <!-- Board container -->
+      <div class="board-container" aria-label="Game board">
+        <!-- Floating cascade score popup (JavaScript-driven) -->
+        <div class="score-popup" id="score-popup" aria-live="assertive" aria-atomic="true"></div>
+
+        <!-- The grid is injected here by board.js -->
+        <div
+          id="game-board"
+          class="game-board"
+          role="grid"
+          aria-label="Match-3 game board"
+        ></div>
+
+        <!-- Bottom status bar -->
+        <div class="board-status-bar">
+          <span id="status-text" class="status-text" aria-live="polite">Select a tile to begin</span>
+        </div>
+      </div>
+
+      <!-- Player 2 panel -->
+      <aside id="panel-p2" class="player-panel glass" aria-label="Player 2 panel">
+        <div class="player-avatar" id="avatar-p2" aria-hidden="true">🤖</div>
+        <div class="player-name" id="name-p2">Player 2</div>
+        <div class="score-display" aria-label="Player 2 score">
+          <span class="score-label">Score</span>
+          <span class="score-value" id="score-p2">0</span>
+        </div>
+        <div class="turn-indicator" id="turn-p2" aria-live="polite">
+          <span class="turn-dot"></span>
+          <span class="turn-text">Waiting…</span>
+        </div>
+        <div class="timer-wrap" aria-label="Turn timer">
+          <div class="timer-bar" id="timer-bar-p2">
+            <div class="timer-fill" id="timer-fill-p2"></div>
+          </div>
+          <span class="timer-seconds" id="timer-secs-p2">15</span>
+        </div>
+        <ul class="match-history" id="history-p2" aria-label="Match history"></ul>
+      </aside>
+    </main>
+
+    <!-- ── Global turn timer banner (mobile) ────────────── -->
+    <div class="mobile-timer" aria-hidden="true">
+      <span id="mobile-timer-label">⏱ 15s</span>
+      <div class="mobile-timer-bar">
+        <div class="mobile-timer-fill" id="mobile-timer-fill"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════
+       SCREEN 3 — SCOREBOARD
+  ════════════════════════════════════════════════════════ -->
+  <section id="screen-scores" class="screen" aria-label="Scoreboard screen" hidden>
+    <div class="orb orb-2" aria-hidden="true"></div>
+
+    <div class="scoreboard-card glass">
+      <header class="scoreboard-header">
+        <h2 class="scoreboard-title">🏆 Scoreboard</h2>
+        <button id="btn-close-scores" class="btn btn-ghost btn-sm" aria-label="Close scoreboard">✕ Close</button>
+      </header>
+
+      <!-- Winner podium -->
+      <div class="podium" id="podium" aria-label="Winner podium">
+        <div class="podium-slot podium-2nd" id="podium-2">
+          <div class="podium-avatar">🥈</div>
+          <div class="podium-name" id="podium-name-2">—</div>
+          <div class="podium-score" id="podium-score-2">0</div>
+          <div class="podium-block p2-block">2</div>
+        </div>
+        <div class="podium-slot podium-1st" id="podium-1">
+          <div class="podium-avatar">🥇</div>
+          <div class="podium-name" id="podium-name-1">—</div>
+          <div class="podium-score" id="podium-score-1">0</div>
+          <div class="podium-block p1-block">1</div>
+        </div>
+        <div class="podium-slot podium-3rd" id="podium-3">
+          <div class="podium-avatar">🥉</div>
+          <div class="podium-name" id="podium-name-3">—</div>
+          <div class="podium-score" id="podium-score-3">0</div>
+          <div class="podium-block p3-block">3</div>
+        </div>
+      </div>
+
+      <!-- Full leaderboard table -->
+      <div class="leaderboard-wrap">
+        <table class="leaderboard" aria-label="Full leaderboard">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Player</th>
+              <th scope="col">Score</th>
+              <th scope="col">Best Chain</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-body">
+            <!-- Injected by board.js -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="scoreboard-actions">
+        <button id="btn-play-again" class="btn btn-primary" aria-label="Play again">
+          ⚡ Play Again
+        </button>
+        <button id="btn-scores-lobby" class="btn btn-ghost" aria-label="Back to lobby">
+          ← Lobby
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════
+       OVERLAY — Game Over
+  ════════════════════════════════════════════════════════ -->
+  <div id="overlay-gameover" class="overlay" hidden aria-modal="true" role="dialog" aria-label="Game over">
+    <div class="overlay-card glass">
+      <div class="overlay-emoji" id="gameover-emoji" aria-hidden="true">🎉</div>
+      <h2 class="overlay-title" id="gameover-title">Game Over!</h2>
+      <p class="overlay-sub" id="gameover-sub">Great match!</p>
+      <div class="overlay-scores">
+        <div class="overlay-score-item">
+          <span class="overlay-score-name" id="go-name-p1">P1</span>
+          <span class="overlay-score-val" id="go-score-p1">0</span>
+        </div>
+        <div class="overlay-score-item">
+          <span class="overlay-score-name" id="go-name-p2">P2</span>
+          <span class="overlay-score-val" id="go-score-p2">0</span>
+        </div>
+      </div>
+      <div class="overlay-actions">
+        <button id="btn-go-again" class="btn btn-primary">⚡ Play Again</button>
+        <button id="btn-go-lobby" class="btn btn-ghost">← Lobby</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="board.js"></script>
+</body>
+</html>
